@@ -19,17 +19,17 @@ for ($paginaVale = 1; $paginaVale <= $totalVales; $paginaVale++) {
         $pdf->AddPage('P','A4');
     }
 
-    $offsetY = (($paginaVale - 1) % 2) * 115;
+    $offsetY = (($paginaVale - 1) % 2) * 108;
     $conceptos = $conceptosPorVale[$paginaVale - 1] ?? [];
 
  
     $datos=$element->detallesGenerales;
     $vehiculo=$datos->vehiculo;
     $pdf->SetLineWidth(0.8); 
-    $pdf->rect(0,$offsetY,210,115,'');
+    $pdf->rect(0,$offsetY,210,108,'');
     $pdf->SetLineWidth(0.2); 
     $tw = 210;
-    $th = 115;
+    $th = 108;
     $gapx=2;
     $gapy=2;
     $mx = 10;
@@ -166,13 +166,14 @@ for ($paginaVale = 1; $paginaVale <= $totalVales; $paginaVale++) {
     $py=$offsetY+$mx+6+9+1+1;
     $w=13;
     $h=60;
-    $imagenX = $px;
-    $imagenY = $py;
-    $imagenW = $w;
+    if($datos->modulo->factura_emisor_id == 4){
+        $pdf->Image('img/'.$datos->modulo->FacturaEmisor->logotipo_emisor,$px,$py+(($h-$w)/2),$w,$w);
+    }else{
+        $pdf->Image('img/vales/'.$datos->modulo->FacturaEmisor->logotipo_emisor,$px,$py,$w,$h);
+    }
     $px+=$w+$gapx;
     $pdf->SetFont('Arial','B',$h/8);
     $incremento = $h/11;
-    $tablaY = $py;
     printrow("CLAVE","CANT"," DESCRIPCION","","","",$pdf,$px,$py,$tw,$incremento);
     $pdf->SetFont('Arial','',$h/8);
     $index = 0;
@@ -189,12 +190,6 @@ for ($paginaVale = 1; $paginaVale <= $totalVales; $paginaVale++) {
         printrow("",$datos1->Cantidad ,$datos1->Descripcion,"","","",$pdf,$px,$py,$tw,$altoRenglon,$incremento);
         $index++;
         $py+=$altoRenglon;
-    }
-    $altoTabla = $py - $tablaY;
-    if($datos->modulo->factura_emisor_id == 4){
-        $pdf->Image('img/'.$datos->modulo->FacturaEmisor->logotipo_emisor,$imagenX,$imagenY+(($altoTabla-$imagenW)/2),$imagenW,$imagenW);
-    }else{
-        $pdf->Image('img/vales/'.$datos->modulo->FacturaEmisor->logotipo_emisor,$imagenX,$imagenY,$imagenW,$altoTabla);
     }
     $py += $gapy;
     $px = $mx;
