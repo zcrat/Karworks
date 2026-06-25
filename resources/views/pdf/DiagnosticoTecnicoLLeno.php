@@ -335,19 +335,24 @@ function money_formato($format, $number)
     } 
     return $format; 
 } 
-function calcularTotalPaginas($pdf, $conceptos,$y,$limite) {
+function calcularTotalPaginas($pdf, $conceptos, $y, $limite) {
     $index = 0;
     $paginas = 0;
     $incremento = 6;
+    $yInicial = $y;
 
     while ($index < count($conceptos)) {
+        $y = $yInicial;
+
         while ($y <= $limite && $index < count($conceptos)) {
             $descripcion = $conceptos[$index]->descripcion ?? '';
             $lineas = getLineCount($pdf, $descripcion, 166);
-
             $alto = $incremento * $lineas;
 
             if ($y + $alto > $limite) {
+                if ($y === $yInicial) {
+                    $index++;
+                }
                 break;
             }
 
