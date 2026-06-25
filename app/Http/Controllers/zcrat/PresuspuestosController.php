@@ -335,7 +335,9 @@ class PresuspuestosController extends Controller
         $fechamin=$request->fechamin ; 
         $fechamax=$request->fechamax ; 
         if($page){
-            $elements = Presupuesto::query()->with(['detallesGenerales.User','mensajes','mensajesNoLeidos','pagos','user_restringido.user','archivos','archivossemaforo']);
+            $elements = Presupuesto::query()
+            ->with(['detallesGenerales.User','mensajes','mensajesNoLeidos','pagos','user_restringido.user','archivos','archivossemaforo'])
+            ->withArchivosSemaforoCount();
 
             if(!in_array($user, [170,171,1]) && !$request->user()->can('ver.todos.presupuestos.restringidos') || $usuario){
                 $elements->whereHas('user_restringido', function ($q) use ($user, $usuario,$request) {
@@ -345,6 +347,9 @@ class PresuspuestosController extends Controller
                         $q->where('user_id', $usuario);
                     }
                 });
+            }
+            if($estatusarchivo){
+                $elements->whereEstatusArchivosSemaforo($estatusarchivo);
             }
             $elements=$elements->where(function($query) use ($search, $estatus, $estatusarchivo, $fechamin, $fechamax,$empresa) {
                 if ($search) {
@@ -380,21 +385,7 @@ class PresuspuestosController extends Controller
                 } elseif ($fechamax) {
                     $query->whereDate('created_at', '<=', $fechamax);
                 }
-                if($estatusarchivo){
-                    if($estatusarchivo = 1 || 2 ){
-                        $query->whereHas('archivossemaforo', function ($q) use ($estatusarchivo) {
-                            if($estatusarchivo == 2){
-                                $q->groupBy('Presupuesto_id')
-                                ->havingRaw('COUNT(*) < 5');
-                            }else{
-                                $q->groupBy('Presupuesto_id')
-                                ->havingRaw('COUNT(*) >= 5');
-                            }
-                        });
-                    }else if($estatusarchivo = 3){
-                        $query->whereDoesntHave('archivossemaforo');
-                    }
-                }
+                
             });
             $total= (clone $elements)->count();
             $elements = $elements

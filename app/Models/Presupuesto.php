@@ -66,4 +66,44 @@ class Presupuesto extends Model
             ->groupBy('Tipo_archivo_id', 'Presupuesto_id');
     }
 
+    
+    public function scopeWhereEstatusArchivosSemaforo($query, $estatusarchivo)
+    {
+        $tipos = [3, 4, 7, 8, 9];
+        $table = $query->getModel()->getTable();
+
+        if ((int) $estatusarchivo === 1) {
+            return $query->whereIn($table . '.id', function ($sub) use ($tipos) {
+                $sub->select('Presupuesto_id')
+                    ->from('archivos_presupuesto')
+                    ->whereNull('deleted_at')
+                    ->whereIn('Tipo_archivo_id', $tipos)
+                    ->groupBy('Presupuesto_id')
+                    ->havingRaw('COUNT(DISTINCT Tipo_archivo_id) >= 5');
+            });
+        }
+
+        if ((int) $estatusarchivo === 2) {
+            return $query->whereIn($table . '.id', function ($sub) use ($tipos) {
+                $sub->select('Presupuesto_id')
+                    ->from('archivos_presupuesto')
+                    ->whereNull('deleted_at')
+                    ->whereIn('Tipo_archivo_id', $tipos)
+                    ->groupBy('Presupuesto_id')
+                    ->havingRaw('COUNT(DISTINCT Tipo_archivo_id) BETWEEN 1 AND 4');
+            });
+        }
+
+        if ((int) $estatusarchivo === 3) {
+            return $query->whereNotIn($table . '.id', function ($sub) use ($tipos) {
+                $sub->select('Presupuesto_id')
+                    ->from('archivos_presupuesto')
+                    ->whereNull('deleted_at')
+                    ->whereIn('Tipo_archivo_id', $tipos);
+            });
+        }
+
+        return $query;
+    }
+
 }
