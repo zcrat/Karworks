@@ -336,8 +336,7 @@ class PresuspuestosController extends Controller
         $fechamax=$request->fechamax ; 
         if($page){
             $elements = Presupuesto::query()
-            ->with(['detallesGenerales.User','mensajes','mensajesNoLeidos','pagos','user_restringido.user','archivos','archivossemaforo'])
-            ->withArchivosSemaforoCount();
+            ->with(['detallesGenerales.User','mensajes','mensajesNoLeidos','pagos','user_restringido.user','archivos','archivossemaforo']);
 
             if(!in_array($user, [170,171,1]) && !$request->user()->can('ver.todos.presupuestos.restringidos') || $usuario){
                 $elements->whereHas('user_restringido', function ($q) use ($user, $usuario,$request) {
